@@ -157,7 +157,7 @@ class File extends XnObject
 
     public static function createTmp($extension = 'tmp')
     {
-        return self::createByFile(TmpFile::getInstance()->makeTmpFilename(static::class, $extension), true);
+        return self::createByFile(TmpFileService::getGlobalInstance()->makeTmpFilename($extension, static::class), true);
     }
 
     // == Object ============================================================
@@ -191,7 +191,7 @@ class File extends XnObject
 
     public function closeStream()
     {
-        if ($this->_stream) {
+        if (is_resource($this->_stream)) {
             fflush($this->_stream);
             $closed = fclose($this->_stream);
 
@@ -209,9 +209,16 @@ class File extends XnObject
         return $this;
     }
 
+    public function rewind()
+    {
+        if (!is_resource($this->_stream)) {
+            rewind($this->_stream);
+        }
+    }
+
     public function getStream($mode = 'rb+')
     {
-        if (!$this->_stream) {
+        if (!is_resource($this->_stream)) {
             $this->_stream = fopen($this->filename, $mode);
         }
 
