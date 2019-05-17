@@ -18,6 +18,7 @@ use XnLibrary\Exception\AssertException;
  * @property int            $size
  * @property bool           $unlink_auto
  *
+ * @property bool|resource  $Stream
  * @property \SplFileObject $Object
  * @property \SplFileInfo   $Info
  * @property File           $Specific
@@ -25,6 +26,9 @@ use XnLibrary\Exception\AssertException;
  */
 class File extends XnObject
 {
+    /** @var bool|resource */
+    private $_stream;
+
     public static $mime_to_types = [
         'inode/x-empty'                 => 'empty',
         'application/x-shockwave-flash' => 'flash',
@@ -167,10 +171,11 @@ class File extends XnObject
 
     public function __destruct()
     {
+        $this->closeStream();
         $this->destroyTmp();
     }
 
-    public function hasSpecific()
+    public function hasSpecific(): bool
     {
         return (bool) self::getSpecificClass($this->mime);
     }
@@ -180,10 +185,43 @@ class File extends XnObject
         if ($this->unlink_auto) {
             $this->unlink();
         }
+
+        return $this;
+    }
+
+    public function closeStream()
+    {
+        if ($this->_stream) {
+            fflush($this->_stream);
+            $closed = fclose($this->_stream);
+
+            if ($this->logger) {
+                if ($closed) {
+                    $this->logger->debug(sprintf('Stream [%s] closed', $this->_stream));
+                } else {
+                    $this->logger->error(sprintf('Stream [%s] closing failed', $this->_stream));
+                }
+            }
+
+            $this->_stream = null;
+        }
+
+        return $this;
+    }
+
+    public function getStream($mode = 'rb+')
+    {
+        if (!$this->_stream) {
+            $this->_stream = fopen($this->filename, $mode);
+        }
+
+        return $this->_stream;
     }
 
     public function unlink()
     {
+        $this->closeStream();
+
         if (isset($this->filename) && file_exists($this->filename)) {
             unlink($this->filename);
         }

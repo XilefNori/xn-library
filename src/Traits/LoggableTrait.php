@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 
 trait LoggableTrait
 {
+    /** @var LoggerInterface|null */
     protected $logger;
 
 
