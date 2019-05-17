@@ -1,0 +1,19 @@
+# Composer lock does NOT affect project using this library
+composer.lock
+
+# Tools
+/cli/composer.phar
+
+# Composer libraries
+/vendor
+
+#IDE
+/.idea
+/.phpStormScatches
+
+#logs
+*.log*
+
+#last but not least, for create empty folder
+!**/.gitkeep
+/.test
