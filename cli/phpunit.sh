@@ -22,8 +22,8 @@ declare da_scripts="$ROOT_DIR/tests/"
 # Functions -----------------------------------------------------------------------
 
 _phpunit() {
-    echo "php $ROOT_DIR/vendor/phpunit/phpunit/phpunit" "$@"
-    php "$ROOT_DIR/vendor/phpunit/phpunit/phpunit" "$@"
+    echo "$ROOT_DIR/vendor/bin/phpunit" "$@"
+    "$ROOT_DIR/vendor/bin/phpunit" "$@"
 }
 
 _phpunit_with_cfg() {
@@ -33,6 +33,10 @@ _phpunit_with_cfg() {
     [[ -f ${fa_phpunit_cfg} ]] && phpunit_opt+=('--configuration' "$fa_phpunit_cfg")
 
     _phpunit "${phpunit_opt[@]}" "$@"
+}
+
+_composer() {
+    "$CLI_DIR/composer.sh" "$@"
 }
 
 _list-funcs() {
@@ -56,6 +60,9 @@ do_c() {
 }
 
 do_full() {
+    echo -e '\n== Updating libs ==================================\n'
+    _composer install
+
     echo -e '\n== Running tests ==================================\n'
 
     _phpunit_with_cfg "${da_scripts}"
